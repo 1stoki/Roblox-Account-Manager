@@ -1,3 +1,5 @@
+> **1stoki fork - browser sign-in repair.** Adding an account now uses installed Chrome or Edge with its native User-Agent and standard security. See [sign-in instructions](docs/browser-login.md). Get this fork's build from [Build Windows  latest successful run  Artifacts](https://github.com/1stoki/Roblox-Account-Manager/actions/workflows/build-windows.yml). The original download links below point to the unchanged upstream release.
+
 [![Download](https://img.shields.io/github/v/release/ic3w0lf22/Roblox-Account-Manager)](https://github.com/ic3w0lf22/Roblox-Account-Manager/releases/latest)
 [![Latest Downloads](https://img.shields.io/github/downloads/ic3w0lf22/Roblox-Account-Manager/latest/total)](https://github.com/ic3w0lf22/Roblox-Account-Manager/releases)
 [![Discord](https://img.shields.io/discord/871845273800957982?label=Discord)](https://discord.gg/MsEH7smXY8)
@@ -103,15 +105,15 @@ Be careful executing random scripts when having dangerous settings enabled.
 **A:** If you have a idea or a request for a feature you can submit such ideas/requests in suggestions
 
 
-## **Q:** I’ve encountered a bug/issue on this software
+## **Q:** I've encountered a bug/issue on this software
 
 **A:** If you have a bug or issue please explain your issue with screenshots (if possible) and/or a highly descriptive explanation in bugs we will try to get back to you ASAP.
 Make sure you click "Open Details" before screenshotting. Please make sure your output is in English.
 
 
-## **Q:** I can’t launch multiple accounts repeatedly.
+## **Q:** I can't launch multiple accounts repeatedly.
 
-**A:** This is due to Roblox’s rate limiting
+**A:** This is due to Roblox's rate limiting
 
 
 ## **Q:** Adding an account doesn't work

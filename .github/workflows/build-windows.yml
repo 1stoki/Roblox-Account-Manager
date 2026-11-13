@@ -1,0 +1,29 @@
+name: Build Windows
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - uses: microsoft/setup-msbuild@v2
+      - uses: NuGet/setup-nuget@v2
+      - name: Test browser selection
+        shell: pwsh
+        run: ./tests/BrowserExecutable.Tests.ps1
+      - name: Restore packages
+        run: nuget restore "RBX Alt Manager.sln" -NonInteractive
+      - name: Build
+        run: msbuild "RBX Alt Manager.sln" /p:Configuration=Release /p:Platform="Any CPU" /m
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Roblox-Account-Manager-browser-fix
+          path: RBX Alt Manager/bin/Release/
+          if-no-files-found: error

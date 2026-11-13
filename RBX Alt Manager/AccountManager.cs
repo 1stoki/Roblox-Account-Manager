@@ -1165,35 +1165,7 @@ namespace RBX_Alt_Manager
                 OpenBrowserStrip.Items.Remove(joinGroupToolStripMenuItem);
             }
 
-            if (PuppeteerSupported && (!Directory.Exists(AccountBrowser.Fetcher.DownloadsFolder) || Directory.GetDirectories(AccountBrowser.Fetcher.DownloadsFolder).Length == 0))
-            {
-                Add.Visible = false;
-                Remove.Visible = false;
-                DownloadProgressBar.Visible = true;
-                DLChromiumLabel.Visible = true;
-
-                Task.Run(async () =>
-                {
-                    IsDownloadingChromium = true;
-
-                    void DownloadProgressChanged(object s, DownloadProgressChangedEventArgs e) => DownloadProgressBar.InvokeIfRequired(() => { DownloadProgressBar.Value = e.ProgressPercentage; });
-
-                    AccountBrowser.Fetcher.DownloadProgressChanged += DownloadProgressChanged;
-                    await AccountBrowser.Fetcher.DownloadAsync(BrowserFetcher.DefaultChromiumRevision);
-                    AccountBrowser.Fetcher.DownloadProgressChanged -= DownloadProgressChanged;
-
-                    IsDownloadingChromium = false;
-
-                    this.InvokeIfRequired(() =>
-                    {
-                        Add.Visible = true;
-                        Remove.Visible = true;
-                        DownloadProgressBar.Visible = false;
-                        DLChromiumLabel.Visible = false;
-                    });
-                });
-            }
-            else if (!PuppeteerSupported)
+            if (!PuppeteerSupported)
             {
                 FileInfo Cef = new FileInfo(Path.Combine(Environment.CurrentDirectory, "x86", "CefSharp.dll"));
 
@@ -1306,32 +1278,20 @@ namespace RBX_Alt_Manager
 
         private async void Add_Click(object sender, EventArgs e)
         {
-            if (PuppeteerSupported)
+            Add.Enabled = false;
+            try
             {
-                Add.Enabled = false;
-
-                try { await new AccountBrowser().Login(); }
-                catch (Exception x)
-                {
-                    Program.Logger.Error($"[Add_Click] An error was encountered attempting to login: {x}");
-
-                    if (Utilities.YesNoPrompt($"An error was encountered attempting to login", "You may have a corrupted chromium installation", "Would you like to re-install chromium?", false))
-                    {
-                        MessageBox.Show("Roblox Account Manager will now close since it can't delete the folder while it's in use.", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-                        if (Directory.GetFiles(AccountBrowser.Fetcher.DownloadsFolder).Length <= 1 && Directory.GetDirectories(AccountBrowser.Fetcher.DownloadsFolder).Length <= 1)
-                            Process.Start("cmd.exe", $"/c rmdir /s /q \"{AccountBrowser.Fetcher.DownloadsFolder}\"");
-                        else
-                            Process.Start("explorer.exe", "/select, " + AccountBrowser.Fetcher.DownloadsFolder);
-
-                        Environment.Exit(0);
-                    }
-                }
-
+                await new AccountBrowser().Login();
+            }
+            catch (Exception x)
+            {
+                Program.Logger.Error($"[Add_Click] An error was encountered attempting to login: {x}");
+                MessageBox.Show($"Unable to open the sign-in browser.\n\n{x.Message}", "Roblox Account Manager", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
                 Add.Enabled = true;
             }
-            else
-                CefBrowser.Instance.Login();
         }
 
         private void DownloadProgressBar_Click(object sender, EventArgs e)

@@ -1,8 +1,6 @@
-﻿using CefSharp;
+using CefSharp;
 using CefSharp.WinForms;
 using Newtonsoft.Json.Linq;
-using PuppeteerExtraSharp;
-using PuppeteerExtraSharp.Plugins.ExtraStealth;
 using PuppeteerSharp;
 using System;
 using System.Collections.Generic;
@@ -52,7 +50,7 @@ namespace RBX_Alt_Manager.Classes
             }));
         }
 
-        public async Task LaunchBrowser(string Url = "https://roblox.com/", Func<Task> PostPageCreation = null, Func<Page, Task> PostNavigation = null, string Script = null, string[] Arguments = null)
+        public async Task LaunchBrowser(string Url = "https://roblox.com/", Func<Task> PostPageCreation = null, Func<Page, Task> PostNavigation = null, string Script = null, string[] Arguments = null, bool ManualLogin = false)
         {
             if (string.IsNullOrEmpty(Url)) Url = "https://roblox.com/";
 
@@ -61,13 +59,13 @@ namespace RBX_Alt_Manager.Classes
             else
                 Position = new Vector2(Screen.PrimaryScreen.WorkingArea.Width / 2 - (Size.X / 2), Screen.PrimaryScreen.WorkingArea.Height / 2 - (Size.Y / 2));
 
-            List<string> Args = new List<string>(Arguments ?? new string[] { "--disable-web-security" });
+            List<string> Args = new List<string>(Arguments ?? Array.Empty<string>());
 
             string ExtensionPath = Path.Combine(Environment.CurrentDirectory, "extension");
             string ConfigPath = Path.Combine(Environment.CurrentDirectory, "BrowserConfig.json");
             BrowserConfig Config = null;
 
-            if (Directory.Exists(ExtensionPath))
+            if (!ManualLogin && Directory.Exists(ExtensionPath))
                 Args.AddRange(new string[] { $@"--disable-extensions-except=""{ExtensionPath}""", $@"--load-extension=""{ExtensionPath}""" });
             if (File.Exists(ConfigPath))
                 File.ReadAllText(ConfigPath).TryParseJson(out Config);
@@ -138,18 +136,23 @@ namespace RBX_Alt_Manager.Classes
                 }
             }
 
-            var Options = new LaunchOptions { Headless = false, DefaultViewport = null, Args = Args.ToArray(), IgnoreHTTPSErrors = true };
+            string executablePath = BrowserExecutable.Find(Config?.ExecutablePath);
+            if (ManualLogin && executablePath == null)
+                throw new FileNotFoundException("Install or update Google Chrome or Microsoft Edge before adding an account, or set ExecutablePath in BrowserConfig.json. The bundled Chromium is too old for reliable sign-in.");
 
-            await Fetcher.DownloadAsync(BrowserFetcher.DefaultChromiumRevision);
+            var Options = new LaunchOptions { Headless = false, DefaultViewport = null, Args = Args.ToArray(), ExecutablePath = executablePath };
 
-            browser = (Browser)await new PuppeteerExtra().Use(new StealthPlugin()).LaunchAsync(Options);
+            if (executablePath == null)
+                await Fetcher.DownloadAsync(BrowserFetcher.DefaultChromiumRevision);
+
+            browser = (Browser)await Puppeteer.LaunchAsync(Options);
             page = (Page)(await browser.PagesAsync())[0];
 
             if (Proxy != null) browser.Disconnected += (s, e) => Proxy.Dispose();
 
-            await page.SetUserAgentAsync("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36");
-
-            if (Config?.PreNavigateActions != null)
+            // Keep the installed browser's native User-Agent and standard web security.
+            // Manual sign-in must not inject scripts or manipulate CAPTCHA frames.
+            if (!ManualLogin && Config?.PreNavigateActions != null)
                 foreach (var action in Config.PreNavigateActions)
                 {
                     if (!Uri.IsWellFormedUriString(action.Key, UriKind.Absolute)) continue;
@@ -158,7 +161,7 @@ namespace RBX_Alt_Manager.Classes
                     await page.EvaluateExpressionAsync(action.Value);
                 }
 
-            if (Config?.PreNavigateScripts != null)
+            if (!ManualLogin && Config?.PreNavigateScripts != null)
                 foreach (var script in Config.PreNavigateScripts)
                     await page.EvaluateExpressionAsync(script);
 
@@ -168,16 +171,16 @@ namespace RBX_Alt_Manager.Classes
 
             if (!string.IsNullOrEmpty(Script)) await page.EvaluateExpressionAsync(Script);
 
-            page.FrameAttached += Page_FrameAttached;
+            if (!ManualLogin) page.FrameAttached += Page_FrameAttached;
 
             if (PostNavigation != null) try { await PostNavigation(page); } catch { }
 
-            if (Config?.PostNavigateScripts != null)
+            if (!ManualLogin && Config?.PostNavigateScripts != null)
                 foreach (var script in Config.PostNavigateScripts)
                     await page.EvaluateExpressionAsync(script);
         }
 
-        public async Task Login(string Username = "", string Password = "", string[] Arguments = null) => await LaunchBrowser("https://roblox.com/login", Arguments: Arguments, PostNavigation: async (page) => await LoginTask(page, Username, Password));
+        public async Task Login(string Username = "", string Password = "", string[] Arguments = null) => await LaunchBrowser("https://www.roblox.com/login", Arguments: Arguments, ManualLogin: true, PostNavigation: async (page) => await LoginTask(page, Username, Password));
 
         public async Task LoginTask(Page page, string Username = "", string Password = "")
         {
@@ -472,6 +475,8 @@ namespace RBX_Alt_Manager.Classes
 
     internal class BrowserConfig
     {
+        public string ExecutablePath;
+
         public Dictionary<string, string> PreNavigateActions;
 
         public List<string> PreNavigateScripts;
