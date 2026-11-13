@@ -66,14 +66,14 @@ namespace RBX_Alt_Manager.Classes
             BrowserConfig Config = null;
 
             if (!ManualLogin && Directory.Exists(ExtensionPath))
-                Args.AddRange(new string[] { $@"--disable-extensions-except=""{ExtensionPath}""", $@"--load-extension=""{ExtensionPath}""" });
+                Args.AddRange(new string[] { $"--disable-extensions-except={ExtensionPath}", $"--load-extension={ExtensionPath}" });
             if (File.Exists(ConfigPath))
                 File.ReadAllText(ConfigPath).TryParseJson(out Config);
 
             if (Config?.CustomArguments != null) Args.AddRange(Config.CustomArguments);
 
             if (Arguments == null)
-                Args.AddRange(new string[] { $"--window-size=\"{(int)Size.X},{(int)Size.Y}\"", $"--window-position=\"{(int)Position.X},{(int)Position.Y}\"" });
+                Args.AddRange(new string[] { $"--window-size={(int)Size.X},{(int)Size.Y}", $"--window-position={(int)Position.X},{(int)Position.Y}" });
 
             string ProxiesPath = Path.Combine(Environment.CurrentDirectory, "proxies.txt");
             string ProxyString = string.Empty, Username = string.Empty, Password = string.Empty;
@@ -145,7 +145,9 @@ namespace RBX_Alt_Manager.Classes
             if (executablePath == null)
                 await Fetcher.DownloadAsync(BrowserFetcher.DefaultChromiumRevision);
 
-            browser = (Browser)await Puppeteer.LaunchAsync(Options);
+            browser = executablePath == null
+                ? (Browser)await Puppeteer.LaunchAsync(Options)
+                : await SystemBrowserLauncher.LaunchAsync(executablePath, Args.ToArray());
             page = (Page)(await browser.PagesAsync())[0];
 
             if (Proxy != null) browser.Disconnected += (s, e) => Proxy.Dispose();

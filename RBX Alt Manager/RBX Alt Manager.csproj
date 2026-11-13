@@ -381,6 +381,7 @@
     <Compile Include="Classes\Batch.cs" />
     <Compile Include="Classes\AccountBrowser.cs" />
     <Compile Include="Classes\BrowserExecutable.cs" />
+    <Compile Include="Classes\SystemBrowserLauncher.cs" />
     <Compile Include="Classes\ClientSettingsPatcher.cs" />
     <Compile Include="Classes\Cryptography.cs" />
     <Compile Include="Classes\MenuButton.cs">

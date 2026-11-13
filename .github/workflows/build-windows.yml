@@ -22,8 +22,22 @@ jobs:
         run: nuget restore "RBX Alt Manager.sln" -NonInteractive
       - name: Build
         run: msbuild "RBX Alt Manager.sln" /p:Configuration=Release /p:Platform="Any CPU" /m
-      - name: Smoke test installed browser
-        run: dotnet run --project tests/BrowserSmoke/BrowserSmoke.csproj --configuration Release
+      - name: Build browser regression tests
+        run: dotnet build tests/BrowserSmoke/BrowserSmoke.csproj --configuration Release
+      - name: Test Chrome and Edge on the application's .NET Framework runtime
+        shell: pwsh
+        run: |
+          & ./tests/BrowserSmoke/bin/Release/net472/BrowserSmoke.exe chrome --packaged
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & ./tests/BrowserSmoke/bin/Release/net472/BrowserSmoke.exe edge --packaged
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Test Chrome and Edge on .NET 8
+        shell: pwsh
+        run: |
+          & ./tests/BrowserSmoke/bin/Release/net8.0/BrowserSmoke.exe chrome
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & ./tests/BrowserSmoke/bin/Release/net8.0/BrowserSmoke.exe edge
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - uses: actions/upload-artifact@v4
         with:
           name: Roblox-Account-Manager-browser-fix

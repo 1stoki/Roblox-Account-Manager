@@ -1,10 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFrameworks>net472;net8.0</TargetFrameworks>
+    <LangVersion>latest</LangVersion>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\..\RBX Alt Manager\Classes\BrowserExecutable.cs" Link="BrowserExecutable.cs" />
+    <Compile Include="..\..\RBX Alt Manager\Classes\SystemBrowserLauncher.cs" Link="SystemBrowserLauncher.cs" />
     <PackageReference Include="PuppeteerSharp" Version="10.0.0" />
   </ItemGroup>
 </Project>
