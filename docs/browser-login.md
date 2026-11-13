@@ -20,4 +20,4 @@ If Roblox continues to show **Try again**, verify sign-in in the same updated br
 
 Build with Visual Studio 2022 / MSBuild and the .NET Framework 4.7.2 targeting pack. Restore `RBX Alt Manager.sln` with NuGet, then build Release / Any CPU. `CefSharp.Common` is aligned to 109.1.110 to match the existing WinForms reference and project imports.
 
-Run `pwsh -File tests/BrowserExecutable.Tests.ps1` for browser selection checks. The **Build Windows** workflow runs these checks, restores packages, builds the application and uploads the Release folder as an Actions artifact.
+Run `pwsh -File tests/BrowserExecutable.Tests.ps1` for browser selection checks. With .NET 8 and Chrome or Edge installed, `dotnet run --project tests/BrowserSmoke/BrowserSmoke.csproj` checks real browser launch, page interaction and cookie access using the same PuppeteerSharp version as the manager. It uses a dummy cookie and does not sign in to Roblox. The **Build Windows** workflow runs these checks, restores packages, builds the application and uploads the Release folder as an Actions artifact.
