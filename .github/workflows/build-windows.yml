@@ -22,6 +22,18 @@ jobs:
         run: nuget restore "RBX Alt Manager.sln" -NonInteractive
       - name: Build
         run: msbuild "RBX Alt Manager.sln" /p:Configuration=Release /p:Platform="Any CPU" /m
+      - name: Build Quick Login checks
+        run: dotnet build tests/QuickLogin/QuickLogin.Tests.csproj --configuration Release
+      - name: Test Quick Login approval and session handling
+        shell: pwsh
+        run: |
+          & ./tests/QuickLogin/bin/Release/net472/QuickLogin.Tests.exe
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & ./tests/QuickLogin/bin/Release/net8.0/QuickLogin.Tests.exe
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Probe live Quick Login create and status endpoints without signing in
+        continue-on-error: true
+        run: ./tests/QuickLogin/bin/Release/net472/QuickLogin.Tests.exe --live-smoke
       - name: Build browser regression tests
         run: dotnet build tests/BrowserSmoke/BrowserSmoke.csproj --configuration Release
       - name: Test Chrome and Edge on the application's .NET Framework runtime

@@ -382,6 +382,8 @@
     <Compile Include="Classes\AccountBrowser.cs" />
     <Compile Include="Classes\BrowserExecutable.cs" />
     <Compile Include="Classes\SystemBrowserLauncher.cs" />
+    <Compile Include="Classes\QuickLoginClient.cs" />
+    <Compile Include="Forms\QuickLoginForm.cs" />
     <Compile Include="Classes\ClientSettingsPatcher.cs" />
     <Compile Include="Classes\Cryptography.cs" />
     <Compile Include="Classes\MenuButton.cs">

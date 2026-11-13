@@ -1281,7 +1281,9 @@ namespace RBX_Alt_Manager
             Add.Enabled = false;
             try
             {
-                await new AccountBrowser().Login();
+                using (var signIn = new QuickLoginForm())
+                    if (signIn.ShowDialog(this) == DialogResult.Retry)
+                        await new AccountBrowser().Login();
             }
             catch (Exception x)
             {
