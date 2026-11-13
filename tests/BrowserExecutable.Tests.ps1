@@ -36,6 +36,9 @@ public static class BrowserExecutableTests
         finally
         {
             Environment.SetEnvironmentVariable("RAM_BROWSER_TEST_ROOT", null);
+            string expectedParent = Path.GetFullPath(Path.GetTempPath()).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            if (!string.Equals(Path.GetDirectoryName(Path.GetFullPath(root)), expectedParent, StringComparison.OrdinalIgnoreCase))
+                throw new Exception("Refusing to remove a test folder outside the temporary directory.");
             Directory.Delete(root, true);
         }
         return passed;

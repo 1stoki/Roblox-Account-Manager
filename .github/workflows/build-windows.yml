@@ -27,5 +27,5 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: Roblox-Account-Manager-browser-fix
-          path: RBX Alt Manager/bin/Release/
+          path: build/Release/
           if-no-files-found: error
